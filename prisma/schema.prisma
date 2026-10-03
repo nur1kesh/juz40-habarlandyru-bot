@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubmissionStatus {
+  received
+  processing
+  approved        // AI approved, waiting for the author's confirmation
+  rejected
+  needs_review    // waiting for admin
+  publishing      // claimed for publication (guards against double publish)
+  published
+  cancelled
+  error           // AI failure, will be retried
+  publish_failed  // Telegram failure, will be retried
+}
+
+model User {
+  id                       Int          @id @default(autoincrement())
+  telegramId               BigInt       @unique @map("telegram_id")
+  username                 String?
+  firstName                String?      @map("first_name")
+  awaitingEditSubmissionId Int?         @map("awaiting_edit_submission_id")
+  createdAt                DateTime     @default(now()) @map("created_at")
+  submissions              Submission[]
+
+  @@map("users")
+}
+
+model Submission {
+  id                 Int              @id @default(autoincrement())
+  userId             Int              @map("user_id")
+  user               User             @relation(fields: [userId], references: [id])
+  status             SubmissionStatus @default(received)
+  originalText       String           @map("original_text")
+  cleanedText        String?          @map("cleaned_text")
+  category           String?
+  aiStatus           String?          @map("ai_status")
+  aiConfidence       Float?           @map("ai_confidence")
+  aiReason           String?          @map("ai_reason")
+  aiWarnings         Json?            @map("ai_warnings")
+  missingInformation Json?            @map("missing_information")
+  aiRawResponse      Json?            @map("ai_raw_response")
+  photoFileIds       String[]         @default([]) @map("photo_file_ids")
+  textHash           String           @map("text_hash")
+  parentId           Int?             @map("parent_id")
+  publishedMessageId Int?             @map("published_message_id")
+  adminMessageId     Int?             @map("admin_message_id")
+  attempts           Int              @default(0)
+  lastError          String?          @map("last_error")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  @@index([userId, createdAt])
+  @@index([textHash])
+  @@index([status, updatedAt])
+  @@map("submissions")
+}

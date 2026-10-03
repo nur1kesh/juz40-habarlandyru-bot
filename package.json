@@ -1,0 +1,35 @@
+{
+  "name": "habarlandyru-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot: AI-assisted intake, moderation and publishing of channel announcements",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "prisma generate && tsc -p tsconfig.build.json",
+    "start": "prisma migrate deploy && node dist/index.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "eval": "tsx scripts/eval.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "dotenv": "^18.0.5",
+    "openai": "^5.23.2",
+    "pino": "^9.14.0",
+    "prisma": "^6.19.3",
+    "telegraf": "^4.16.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}
